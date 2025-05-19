@@ -1,6 +1,21 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
+import { provideRouter } from '@angular/router';
+import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
+import { KeycloakService } from './app/auth/keycloak.service';
 
-bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+async function main() {
+  // Crie uma instância temporária manualmente para inicializar antes do bootstrap
+  const keycloakService = new KeycloakService();
+  await keycloakService.init();
+
+  // Agora sim, inicie o Angular e passe o serviço já inicializado
+  bootstrapApplication(AppComponent, {
+    providers: [
+      provideRouter(routes),
+      { provide: KeycloakService, useValue: keycloakService }
+    ]
+  });
+}
+
+main();
